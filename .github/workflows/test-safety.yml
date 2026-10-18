@@ -1,0 +1,33 @@
+name: Femsy Token Safety Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      mint_address:
+        description: "Solana token mint address"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  safety-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run token safety check
+        env:
+          TOKEN_ADDRESS: ${{ inputs.mint_address }}
+          PYTHONUNBUFFERED: "1"
+        run: |
+          python -c "import os; from safety_scanner import check_token_safety; import json; print(json.dumps(check_token_safety(os.environ['TOKEN_ADDRESS']), indent=2))"
