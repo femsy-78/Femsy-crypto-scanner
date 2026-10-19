@@ -28,6 +28,7 @@ jobs:
       - name: Run token safety check
         env:
           TOKEN_ADDRESS: ${{ inputs.mint_address }}
+          HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}
           PYTHONUNBUFFERED: "1"
         run: |
           python -c "import os; from safety_scanner import check_token_safety; import json; print(json.dumps(check_token_safety(os.environ['TOKEN_ADDRESS']), indent=2))"
