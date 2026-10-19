@@ -1,8 +1,17 @@
+import os
 import json
 import urllib.request
 import urllib.error
 
-SOLANA_RPC = "https://api.mainnet-beta.solana.com"
+HELIUS_API_KEY = os.environ.get("HELIUS_API_KEY")
+
+if HELIUS_API_KEY:
+    SOLANA_RPC = (
+        "https://mainnet.helius-rpc.com/"
+        f"?api-key={HELIUS_API_KEY}"
+    )
+else:
+    SOLANA_RPC = "https://api.mainnet-beta.solana.com"
 
 
 def rpc_call(method, params):
