@@ -27,9 +27,8 @@ jobs:
           python-version: "3.12"
 
        - name: Run Solana scanner
-  env:
-  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}
   PYTHONUNBUFFERED: "1"
   run: python scanner.py
