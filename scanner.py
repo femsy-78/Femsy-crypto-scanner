@@ -176,6 +176,42 @@ def analyse_pair(pair):
 
 
 def format_alert(item):
+    safety = item.get("safety", {})
+    checks = safety.get("checks", {})
+    warnings = safety.get("warnings", [])
+
+    if not safety.get("data_complete", False):
+        safety_status = "⚠️ INCOMPLETE — DO NOT ASSUME SAFE"
+    else:
+        mint = checks.get("mint_authority", {}).get("status", "UNKNOWN")
+        freeze = checks.get("freeze_authority", {}).get("status", "UNKNOWN")
+
+        concentration = checks.get(
+            "top_10_account_concentration", {}
+        )
+
+        concentration_status = concentration.get(
+            "status", "UNKNOWN"
+        )
+        concentration_percent = concentration.get(
+            "estimated_percent"
+        )
+
+        safety_status = (
+            f"Mint authority: {mint}\n"
+            f"Freeze authority: {freeze}\n"
+            f"Top-10 account concentration: {concentration_status}"
+        )
+
+        if concentration_percent is not None:
+            safety_status += f" ({concentration_percent:.2f}%)"
+
+    warning_text = (
+        "\n".join(f"⚠️ {warning}" for warning in warnings)
+        if warnings
+        else "No warnings reported by these checks."
+    )
+
     return (
         f"{item['category']}\n\n"
         f"Token: {item['name']} ({item['symbol']})\n"
@@ -186,12 +222,15 @@ def format_alert(item):
         f"5m sells: {item['sells']}\n"
         f"5m price change: {item['change_5m']:.1f}%\n"
         f"Flow: {item['flow']}\n\n"
+        f"🛡️ TOKEN SAFETY\n"
+        f"{safety_status}\n\n"
+        f"Warnings:\n{warning_text}\n\n"
         f"Token address:\n{item['address']}\n\n"
         f"Chart: {item['url']}\n\n"
         "⚠️ Research alert, not a buy signal.\n"
-        "Check token authority, holder concentration, "
-        "liquidity quality and wallet activity manually.\n"
-        "Filters cannot guarantee safety or profit."
+        "These checks do not guarantee token safety or profit.\n"
+        "Verify holder ownership, liquidity quality, "
+        "token extensions and wallet activity manually."
     )
 
 
