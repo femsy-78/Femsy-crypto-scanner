@@ -5,6 +5,8 @@ import urllib.request
 import urllib.parse
 import urllib.error
 
+from safety_scanner import check_token_safety
+
 BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
 
