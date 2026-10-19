@@ -256,7 +256,7 @@ def main():
 
             item = analyse_pair(pair)
 
-            if not item:
+                        if not item:
                 continue
 
             pair_id = item["pair_address"] or item["address"]
@@ -264,6 +264,20 @@ def main():
             if not pair_id or pair_id in seen:
                 continue
 
+            print(f"Checking safety for {item['symbol']}...")
+
+            try:
+                item["safety"] = check_token_safety(item["address"])
+            except Exception as error:
+                item["safety"] = {
+                    "checks": {},
+                    "warnings": [
+                        f"Safety check failed: {error}"
+                    ],
+                    "data_complete": False
+                }
+
+            send_telegram(format_alert(item))
             send_telegram(format_alert(item))
             seen.add(pair_id)
             found += 1
