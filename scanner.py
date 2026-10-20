@@ -247,7 +247,7 @@ def main():
         item["tokenAddress"] for item in profiles
     ))[:30]
 
-    for address in addresses:
+        for address in addresses:
         pairs = get_token_pairs(address)
 
         for pair in pairs:
@@ -256,8 +256,8 @@ def main():
 
             item = analyse_pair(pair)
 
-if not item:
-    continue
+            if not item:
+                continue
 
             pair_id = item["pair_address"] or item["address"]
 
