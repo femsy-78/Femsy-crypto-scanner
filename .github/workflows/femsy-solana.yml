@@ -17,14 +17,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Run Solana scanner
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}
           PYTHONUNBUFFERED: "1"
-         run: |
+        run: |
           pwd
           ls -la
           find . -maxdepth 3 -type f -iname '*scanner*'
