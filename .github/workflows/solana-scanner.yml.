@@ -1,7 +1,6 @@
 name: Femsy Solana Scanner
-
 on:
-  workflow_dispatch:
+ workflow_dispatch:
   schedule:
     - cron: "*/5 * * * *"
 
@@ -14,9 +13,9 @@ concurrency:
 
 jobs:
   scan:
-    runs-on: ubuntu-latest
-    timeout-minutes: 4
-    steps:
+  runs-on: ubuntu-latest
+  timeout-minutes: 4
+ steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
