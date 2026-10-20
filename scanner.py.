@@ -256,8 +256,8 @@ def main():
 
             item = analyse_pair(pair)
 
-                        if not item:
-                continue
+if not item:
+    continue
 
             pair_id = item["pair_address"] or item["address"]
 
@@ -277,7 +277,6 @@ def main():
                     "data_complete": False
                 }
 
-            send_telegram(format_alert(item))
             send_telegram(format_alert(item))
             seen.add(pair_id)
             found += 1
