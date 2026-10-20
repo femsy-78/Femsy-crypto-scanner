@@ -24,4 +24,8 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}
           PYTHONUNBUFFERED: "1"
-        run: python scanner.py
+         run: |
+          pwd
+          ls -la
+          find . -maxdepth 3 -type f -iname '*scanner*'
+          python scanner.py
