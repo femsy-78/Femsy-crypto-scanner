@@ -247,7 +247,7 @@ def main():
         item["tokenAddress"] for item in profiles
     ))[:30]
 
-        for address in addresses:
+    for address in addresses:
         pairs = get_token_pairs(address)
 
         for pair in pairs:
@@ -271,16 +271,13 @@ def main():
             except Exception as error:
                 item["safety"] = {
                     "checks": {},
-                    "warnings": [
-                        f"Safety check failed: {error}"
-                    ],
+                    "warnings": [f"Safety check failed: {error}"],
                     "data_complete": False
                 }
 
             send_telegram(format_alert(item))
             seen.add(pair_id)
             found += 1
-
             # Avoid sending too many messages at once.
             time.sleep(1)
 
