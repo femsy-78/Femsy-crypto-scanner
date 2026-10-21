@@ -17,7 +17,30 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Run Solana scanner
+          - name: Test Solana RPC access 
+run: | python - <<'PY'import json import urllib.request
+    url = "https://api.mainnet-beta.solana.com"
+    payload = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "getHealth"
+    }
+    request = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode(),
+        headers={"Content-Type": "application/json"},
+        method="POST"
+    )
+
+    try:
+        with urllib.request.urlopen(request, timeout=15) as response:
+            result = json.loads(response.read().decode())
+        print("Solana RPC response:", result)
+    except Exception as error:
+        print("Solana RPC test failed:", error)
+        raise
+    PY
+          - name: Run Solana scanner
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
