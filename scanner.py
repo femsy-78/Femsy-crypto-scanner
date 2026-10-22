@@ -94,9 +94,9 @@ def get_token_pairs(token_address):
         print(f"Pair lookup failed: {error}")
 
     return []
-    def qualifies_for_main_alert(item):
+def qualifies_for_main_alert(item):
     """Reject candidates that fail any required verification."""
-        required_fields = [
+    required_fields = [
         "age_minutes",
         "market_cap",
         "liquidity",
@@ -112,9 +112,9 @@ def get_token_pairs(token_address):
         "x_verified",
         "telegram_verified",
         "ownership_data_complete",
-    ]
-    # Missing data must never count as a pass.
-    if any(
+        ]
+# Missing data must never count as a pass.
+if any(
         field not in item or item[field] is None
         for field in required_fields
     ):
