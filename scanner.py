@@ -94,10 +94,91 @@ def get_token_pairs(token_address):
         print(f"Pair lookup failed: {error}")
 
     return []
+def qualifies_for_main_alert(item):
+"""Reject candidates that fail any required verification."""
 
+required_fields = [
+    "age_minutes",
+    "market_cap",
+    "liquidity",
+    "volume_5m",
+    "bonding_curve_percent",
+    "holders",
+    "top_10_holdings_percent",
+    "dev_holdings_percent",
+    "dev_sold",
+    "mint_authority_revoked",
+    "freeze_authority_revoked",
+    "pump_fun_verified",
+    "x_verified",
+    "telegram_verified",
+    "ownership_data_complete",
+]
+
+# Missing data must never count as a pass.
+if any(field not in item or item[field] is None
+       for field in required_fields):
+    return False
+
+# Token age: 5–15 minutes.
+if not 5 <= item["age_minutes"] <= 15:
+    return False
+
+# Market capitalization: $20k–$30k.
+if not 20_000 <= item["market_cap"] <= 30_000:
+    return False
+
+# Liquidity: $25k–$80k.
+if not 25_000 <= item["liquidity"] <= 80_000:
+    return False
+
+# Five-minute volume: $80k–$200k.
+if not 80_000 <= item["volume_5m"] <= 200_000:
+    return False
+
+# Pump.fun bonding curve: 90%–98%.
+if not 90 <= item["bonding_curve_percent"] <= 98:
+    return False
+
+# Holder count: 100–200.
+if not 100 <= item["holders"] <= 200:
+    return False
+
+# Reject excessive concentration.
+if item["top_10_holdings_percent"] > 35:
+    return False
+
+# Reject excessive developer holdings.
+if item["dev_holdings_percent"] > 10:
+    return False
+
+# Required safety and platform checks.
+if item["dev_sold"] is not False:
+    return False
+
+if item["mint_authority_revoked"] is not True:
+    return False
+
+if item["freeze_authority_revoked"] is not True:
+    return False
+
+if item["pump_fun_verified"] is not True:
+    return False
+
+if item["x_verified"] is not True:
+    return False
+
+if item["telegram_verified"] is not True:
+    return False
+
+if item["ownership_data_complete"] is not True:
+    return False
+
+return True
 
 def analyse_pair(pair):
     liquidity = (pair.get("liquidity") or {}).get("usd") or 0
+    market_cap = pair.get("marketCap")
     volume = pair.get("volume") or {}
     txns = pair.get("txns") or {}
     m5 = txns.get("m5") or {}
@@ -119,6 +200,7 @@ def analyse_pair(pair):
         0,
         (time.time() * 1000 - created_at) / 3_600_000
     )
+    age_minutes = age_hours * 60
 
     if liquidity < MIN_LIQUIDITY_USD:
         return None
@@ -164,11 +246,13 @@ def analyse_pair(pair):
         "address": address,
         "url": pair.get("url") or "",
         "liquidity": liquidity,
+        "market_cap": market_cap,
         "volume_5m": volume_5m,
         "buys": buys,
         "sells": sells,
         "buy_ratio": buy_ratio,
         "age_hours": age_hours,
+        "age_minutes": age_minutes,
         "change_5m": change_5m,
         "flow": flow,
         "pair_address": pair.get("pairAddress", "")
