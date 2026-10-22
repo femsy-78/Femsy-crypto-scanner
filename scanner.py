@@ -94,32 +94,33 @@ def get_token_pairs(token_address):
         print(f"Pair lookup failed: {error}")
 
     return []
-    def some_function(item):
-    # Reject candidates that fail any required verification.
-required_fields = [
-    "age_minutes",
-    "market_cap",
-    "liquidity",
-    "volume_5m",
-    "bonding_curve_percent",
-    "holders",
-    "top_10_holdings_percent",
-    "dev_holdings_percent",
-    "dev_sold",
-    "mint_authority_revoked",
-    "freeze_authority_revoked",
-    "pump_fun_verified",
-    "x_verified",
-    "telegram_verified",
-    "ownership_data_complete",
-]
+    def qualifies_for_main_alert(item):
+    """Reject candidates that fail any required verification."""
 
-# Missing data must never count as a pass.
-if any(
-    field not in item or item[field] is None
-    for field in required_fields
-):
-    return False
+    required_fields = [
+        "age_minutes",
+        "market_cap",
+        "liquidity",
+        "volume_5m",
+        "bonding_curve_percent",
+        "holders",
+        "top_10_holdings_percent",
+        "dev_holdings_percent",
+        "dev_sold",
+        "mint_authority_revoked",
+        "freeze_authority_revoked",
+        "pump_fun_verified",
+        "x_verified",
+        "telegram_verified",
+        "ownership_data_complete",
+    ]
+
+    # Missing data must never count as a pass.
+    if any(
+        field not in item or item[field] is None
+        for field in required_fields
+    ):
+        return False
 
 # Token age: 5–15 minutes.
 if not 5 <= item["age_minutes"] <= 15:
