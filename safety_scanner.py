@@ -153,12 +153,13 @@ except Exception as error:
         "Safety checks incomplete: " + str(error)
     )
 
-return report
-      if name == "main":
-address = input("Enter a Solana token mint address: ").strip()
+    return report
 
-      if not address:
-    print("No token address supplied.")
-else:
-    result = check_token_safety(address)
-    print(json.dumps(result, indent=2))
+if __name__ == "__main__":
+    address = input("Enter a Solana token mint address: ").strip()
+
+    if not address:
+        print("No token address supplied.")
+    else:
+        result = check_token_safety(address)
+        print(json.dumps(result, indent=2))
