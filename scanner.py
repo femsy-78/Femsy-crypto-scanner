@@ -292,7 +292,8 @@ def format_alert(item):
     return (
         f"{item['category']}\n\n"
         f"Token: {item['name']} ({item['symbol']})\n"
-        f"Age: {item['age_hours']:.2f} hours\n"
+        f"Market cap: ${item['market_cap']:,.0f}\n"
+        f"Age: {item['age_minutes']:.1f} minutes\n"
         f"Liquidity: ${item['liquidity']:,.0f}\n"
         f"5m volume: ${item['volume_5m']:,.0f}\n"
         f"5m buys: {item['buys']}\n"
