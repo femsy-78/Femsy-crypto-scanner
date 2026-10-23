@@ -32,7 +32,7 @@ def rpc_call(method, params):
 
     with urllib.request.urlopen(request, timeout=20) as response:
         result = json.loads(response.read().decode("utf-8"))
-    if "error" in result:
+   if "error" in result:
         raise RuntimeError(result["error"].get("message", "RPC error"))
 
     return result.get("result", {}).get("value")
@@ -51,8 +51,8 @@ def check_token_safety(mint_address):
 False
     }
 
-      try:
-       # Read the token mint account.
+    try:
+        # Read the token mint account.
         account = rpc_call(
             "getAccountInfo",
             [
@@ -60,8 +60,7 @@ False
                 {"encoding": "jsonParsed", "commitment": "confirmed"}
             ]
         )
-
-     if not account:
+    if not account:
             report["warnings"].append(
                 "Mint account not found. Verify the token address."
             )
