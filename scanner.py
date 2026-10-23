@@ -170,6 +170,8 @@ def qualifies_for_main_alert(item):
 def analyse_pair(pair):
     liquidity = (pair.get("liquidity") or {}).get("usd") or 0
     market_cap = pair.get("marketCap")
+    if market_cap is None:
+    return None
     volume = pair.get("volume") or {}
     txns = pair.get("txns") or {}
     m5 = txns.get("m5") or {}
