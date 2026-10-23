@@ -40,20 +40,21 @@ def rpc_call(method, params):
         )
 
     return result.get("result", {}).get("value")
-def check_token_safety(mint_address):
+    
+def
+check_token_safety(mint_address):
     """Inspect basic Solana token risks."""
-
         report = {
         "mint_address": mint_address,
         "checks": {},
         "warnings": [],
         "data_complete": False,
         "ownership_data_complete": False
-        }
+    }
 
-    try:
-        # Read the token mint account.
-        account = rpc_call(
+        try:
+            # Read the token mint account.
+            account = rpc_call(
             "getAccountInfo",
             [
                 mint_address,
