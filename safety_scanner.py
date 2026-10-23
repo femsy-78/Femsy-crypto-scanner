@@ -118,48 +118,45 @@ def check_token_safety(mint_address):
         )
 
         if largest is None:
-            raise RuntimeError("Largest-account data unavailable")
+raise RuntimeError("Largest-account data unavailable")
 
-        accounts = largest
-        top_raw = sum(
-            int(item.get("amount", "0"))
-            for item in accounts
+    accounts = largest
+    top_raw = sum(
+        int(item.get("amount", "0"))
+        for item in accounts
+    )
+
+    concentration = (top_raw / total_raw) * 100
+
+    report["checks"]["top_10_account_concentration"] = {
+        "status": (
+            "HIGH" if concentration >= 50
+            else "MODERATE" if concentration >= 20
+            else "LOW"
+        ),
+        "estimated_percent": round(concentration, 2),
+        "note": (
+            "Token accounts, not verified individual wallets. "
+            "Liquidity pools and other special accounts may affect "
+            "this estimate."
         )
+    }
 
-        concentration = (top_raw / total_raw) * 100
+    report["data_complete"] = True
+    report["ownership_data_complete"] = False
 
-        report["checks"]["top_10_account_concentration"] = {
-            "status": (
-                "HIGH" if concentration >= 50
-                else "MODERATE" if concentration >= 20
-                else "LOW"
-            ),
-            "estimated_percent": round(concentration, 2),
-            "note": (
-                "Token accounts, not verified individual wallets. "
-                "Liquidity pools and other special accounts may affect "
-                "this estimate."
-            )
-        }
+except Exception as error:
+    report["warnings"].append(
+        "Safety checks incomplete: " + str(error)
+    )
 
-                            report["data_complete"] = True
-        report["ownership_data_complete"] = False
-                    except Exception as error:
-        report["warnings"].append(
-            "Safety checks incomplete: " + str(error)
-        )
+return report
 
-    return report
-            )
+if name == "main":
+address = input("Enter a Solana token mint address: ").strip()
 
-    return report
-
-
-if __name__ == "__main__":
-    address = input("Enter a Solana token mint address: ").strip()
-
-    if not address:
-        print("No token address supplied.")
-    else:
-        result = check_token_safety(address)
-        print(json.dumps(result, indent=2))
+if not address:
+    print("No token address supplied.")
+else:
+    result = check_token_safety(address)
+    print(json.dumps(result, indent=2))
