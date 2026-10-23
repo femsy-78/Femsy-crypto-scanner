@@ -142,8 +142,12 @@ def check_token_safety(mint_address):
             )
         }
 
-        report["data_complete"] = True
-report["ownership_data_complete"] = False
+                    report["data_complete"] = True
+            report["ownership_data_complete"] = False
+                except Exception as error:
+            report["warnings"].append(
+                "Safety checks incomplete: " + str(error)
+            )
 
     return report
 
