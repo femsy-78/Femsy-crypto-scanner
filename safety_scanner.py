@@ -71,7 +71,7 @@ def check_token_safety(mint_address):
         info = parsed.get("info", {})
         token_type = parsed.get("type")
 
-     if token_type != "mint":
+        if token_type != "mint":
             report["warnings"].append(
                 "Account could not be verified as a token mint."
             )
