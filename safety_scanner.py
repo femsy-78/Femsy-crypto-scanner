@@ -48,8 +48,8 @@ def check_token_safety(mint_address):
         "data_complete": False,
         "ownership_data_complete": False
     }
-
-       try:
+    
+ try:
         # Read the token mint account.
         account = rpc_call(
             "getAccountInfo",
