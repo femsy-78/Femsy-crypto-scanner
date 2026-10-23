@@ -117,15 +117,16 @@ def check_token_safety(mint_address):
             [mint_address]
         )
 
-         if largest is None:
+        if largest is None:
             raise RuntimeError("Largest-account data unavailable")
-                             largest = rpc_call(
+            largest = rpc_call(
             "getTokenLargestAccounts",
             [mint_address]
         )
 
         if largest is None:
-            raise RuntimeError("Largest-account data unavailable")
+            raise
+            RuntimeError("Largest-account data unavailable")
             accounts = largest
             top_raw = sum(
             int(item.get("amount", "0"))
