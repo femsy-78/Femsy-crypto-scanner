@@ -39,15 +39,18 @@ def rpc_call(method, params):
     return result.get("result", {}).get("value")
 
 
-def check_token_safety(mint_address):
-"""Inspect basic Solana token risks."""
+def
+check_token_safety(mint_address):
+    """Inspect basic Solana token risks."""
 
-report = {
-    "mint_address": mint_address,
-    "checks": {},
-    "warnings": [],
-    "data_complete": False,
-    "ownership_data_complete": False
+    report = {
+        "mint_address": mint_address,
+        "checks": {},
+        "warnings": [],
+        "data_complete": False,
+        "ownership_data_complete": False
+         "ownership_data_complete": 
+        False
 }
 
 try:
