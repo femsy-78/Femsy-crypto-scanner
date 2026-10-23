@@ -15,7 +15,8 @@ else:
 
 
 def rpc_call(method, params):
-    """Call the public Solana RPC endpoint."""
+    """Call the Solana RPC endpoint."""
+
     payload = json.dumps({
         "jsonrpc": "2.0",
         "id": 1,
@@ -32,13 +33,13 @@ def rpc_call(method, params):
 
     with urllib.request.urlopen(request, timeout=20) as response:
         result = json.loads(response.read().decode("utf-8"))
-   if "error" in result:
-        raise RuntimeError(result["error"].get("message", "RPC error"))
+
+    if "error" in result:
+        raise RuntimeError(
+            result["error"].get("message", "RPC error")
+        )
 
     return result.get("result", {}).get("value")
-
-
-
 def check_token_safety(mint_address):
     """Inspect basic Solana token risks."""
 
@@ -47,9 +48,7 @@ def check_token_safety(mint_address):
         "checks": {},
         "warnings": [],
         "data_complete": False,
-        "ownership_data_complete": 
-False
-    }
+        "ownership_data_complete": False
 
     try:
         # Read the token mint account.
