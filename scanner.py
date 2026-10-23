@@ -96,6 +96,7 @@ def get_token_pairs(token_address):
     return []
 def qualifies_for_main_alert(item):
     """Reject candidates that fail any required verification."""
+
     required_fields = [
         "age_minutes",
         "market_cap",
@@ -112,68 +113,60 @@ def qualifies_for_main_alert(item):
         "x_verified",
         "telegram_verified",
         "ownership_data_complete",
-        ]
-# Missing data must never count as a pass.
-if any(
+    ]
+
+    if any(
         field not in item or item[field] is None
         for field in required_fields
     ):
         return False
-# Token age: 5–15 minutes.
-if not 5 <= item["age_minutes"] <= 15:
-    return False
 
-# Market capitalization: $20k–$30k.
-if not 20_000 <= item["market_cap"] <= 30_000:
-    return False
+    if not 5 <= item["age_minutes"] <= 15:
+        return False
 
-# Liquidity: $25k–$80k.
-if not 25_000 <= item["liquidity"] <= 80_000:
-    return False
+    if not 20_000 <= item["market_cap"] <= 30_000:
+        return False
 
-# Five-minute volume: $80k–$200k.
-if not 80_000 <= item["volume_5m"] <= 200_000:
-    return False
+    if not 25_000 <= item["liquidity"] <= 80_000:
+        return False
 
-# Pump.fun bonding curve: 90%–98%.
-if not 90 <= item["bonding_curve_percent"] <= 98:
-    return False
+    if not 80_000 <= item["volume_5m"] <= 200_000:
+        return False
 
-# Holder count: 100–200.
-if not 100 <= item["holders"] <= 200:
-    return False
+    if not 90 <= item["bonding_curve_percent"] <= 98:
+        return False
 
-# Reject excessive concentration.
-if item["top_10_holdings_percent"] > 35:
-    return False
+    if not 100 <= item["holders"] <= 200:
+        return False
 
-# Reject excessive developer holdings.
-if item["dev_holdings_percent"] > 10:
-    return False
+    if item["top_10_holdings_percent"] > 35:
+        return False
 
-# Required safety and platform checks.
-if item["dev_sold"] is not False:
-    return False
+    if item["dev_holdings_percent"] > 10:
+        return False
 
-if item["mint_authority_revoked"] is not True:
-    return False
+    if item["dev_sold"] is not False:
+        return False
 
-if item["freeze_authority_revoked"] is not True:
-    return False
+    if item["mint_authority_revoked"] is not True:
+        return False
 
-if item["pump_fun_verified"] is not True:
-    return False
+    if item["freeze_authority_revoked"] is not True:
+        return False
 
-if item["x_verified"] is not True:
-    return False
+    if item["pump_fun_verified"] is not True:
+        return False
 
-if item["telegram_verified"] is not True:
-    return False
+    if item["x_verified"] is not True:
+        return False
 
-if item["ownership_data_complete"] is not True:
-    return False
+    if item["telegram_verified"] is not True:
+        return False
 
-return True
+    if item["ownership_data_complete"] is not True:
+        return False
+
+    return True
 def analyse_pair(pair):
     liquidity = (pair.get("liquidity") or {}).get("usd") or 0
     market_cap = pair.get("marketCap")
