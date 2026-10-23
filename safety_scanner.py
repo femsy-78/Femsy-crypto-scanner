@@ -52,16 +52,16 @@ def check_token_safety(mint_address):
         "ownership_data_complete": False
     }
 
-    try: 
-        # Read the token mint account.
-            account = rpc_call(
+    try:
+        account = rpc_call(
             "getAccountInfo",
             [
                 mint_address,
                 {"encoding": "jsonParsed", "commitment": "confirmed"}
             ]
         )
-    if not account:
+
+     if not account:
             report["warnings"].append(
                 "Mint account not found. Verify the token address."
             )
