@@ -52,7 +52,7 @@ def check_token_safety(mint_address):
         "ownership_data_complete": False
     }
 
-    try:
+        try:
         account = rpc_call(
             "getAccountInfo",
             [
@@ -61,7 +61,7 @@ def check_token_safety(mint_address):
             ]
         )
 
-         if not account:
+        if not account:
             report["warnings"].append(
                 "Mint account not found. Verify the token address."
             )
