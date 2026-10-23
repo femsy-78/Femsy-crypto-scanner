@@ -117,10 +117,17 @@ def check_token_safety(mint_address):
             [mint_address]
         )
 
-       if largest is None:
+         if largest is None:
             raise RuntimeError("Largest-account data unavailable")
-                   accounts = largest
-        top_raw = sum(
+                             largest = rpc_call(
+            "getTokenLargestAccounts",
+            [mint_address]
+        )
+
+        if largest is None:
+            raise RuntimeError("Largest-account data unavailable")
+            accounts = largest
+            top_raw = sum(
             int(item.get("amount", "0"))
             for item in accounts
         )
@@ -151,10 +158,10 @@ except Exception as error:
 
 return report
 
-if name == "main":
+      if name == "main":
 address = input("Enter a Solana token mint address: ").strip()
 
-if not address:
+      if not address:
     print("No token address supplied.")
 else:
     result = check_token_safety(address)
