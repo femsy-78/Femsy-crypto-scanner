@@ -52,7 +52,7 @@ def check_token_safety(mint_address):
         "ownership_data_complete": False
     }
 
-        try:
+    try:
         account = rpc_call(
             "getAccountInfo",
             [
