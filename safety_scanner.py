@@ -43,7 +43,7 @@ def rpc_call(method, params):
     
 def check_token_safety(mint_address):
     """Inspect basic Solana token risks."""
-    
+
     report = {
         "mint_address": mint_address,
         "checks": {},
@@ -53,6 +53,7 @@ def check_token_safety(mint_address):
     }
 
     try:
+        # Read the token mint account.
         account = rpc_call(
             "getAccountInfo",
             [
@@ -77,6 +78,7 @@ def check_token_safety(mint_address):
             )
             return report
 
+        # Check mint and freeze authorities.
         mint_authority = info.get("mintAuthority")
         freeze_authority = info.get("freezeAuthority")
 
@@ -91,66 +93,68 @@ def check_token_safety(mint_address):
         }
 
         if mint_authority:
-        report["warnings"].append(
-            "Mint authority exists; additional tokens may be created."
-        )
+            report["warnings"].append(
+                "Mint authority exists; additional tokens may be created."
+            )
 
         if freeze_authority:
-        report["warnings"].append(
-            "Freeze authority exists; token accounts may be frozen."
-        )
+            report["warnings"].append(
+                "Freeze authority exists; token accounts may be frozen."
+            )
 
-    # Read total token supply.
-    supply = rpc_call("getTokenSupply", [mint_address])
+        # Read total token supply.
+        supply = rpc_call("getTokenSupply", [mint_address])
 
         if not supply:
-        raise RuntimeError("Token supply data unavailable")
+            raise RuntimeError("Token supply data unavailable")
 
-    total_raw = int(supply.get("amount", "0"))
+        total_raw = int(supply.get("amount", "0"))
 
         if total_raw <= 0:
-        raise RuntimeError("Token supply is zero or unavailable")
+            raise RuntimeError("Token supply is zero or unavailable")
 
-    # Read the ten largest token accounts.
-    largest = rpc_call(
-        "getTokenLargestAccounts",
-        [mint_address]
-    )
-
-       if largest is None:
-        raise RuntimeError("Largest-account data unavailable")
-
-    accounts = largest
-
-    top_raw = sum(
-        int(item.get("amount", "0"))
-        for item in accounts
-    )
-
-    concentration = (top_raw / total_raw) * 100
-
-    report["checks"]["top_10_account_concentration"] = {
-        "status": (
-            "HIGH" if concentration >= 50
-            else "MODERATE" if concentration >= 20
-            else "LOW"
-        ),
-        "estimated_percent": round(concentration, 2),
-        "note": (
-            "This is an estimate from token accounts, not verified "
-            "individual holders. Liquidity pools and special accounts "
-            "may affect the result."
+        # Read the ten largest token accounts.
+        largest = rpc_call(
+            "getTokenLargestAccounts",
+            [mint_address]
         )
-    }
 
-    # These checks do not establish individual-holder ownership.
-    report["ownership_data_complete"] = False
-    report["data_complete"] = True
+        if not isinstance(largest, dict):
+            raise RuntimeError("Largest-account data unavailable")
 
-except Exception as error:
-    report["warnings"].append(
-        "Safety checks incomplete: " + str(error)
-    )
+        accounts = largest.get("value")
+
+        if not isinstance(accounts, list):
+            raise RuntimeError("Largest-account list unavailable")
+
+        top_raw = sum(
+            int(item.get("amount", "0"))
+            for item in accounts
+        )
+
+        concentration = (top_raw / total_raw) * 100
+
+        report["checks"]["top_10_account_concentration"] = {
+            "status": (
+                "HIGH" if concentration >= 50
+                else "MODERATE" if concentration >= 20
+                else "LOW"
+            ),
+            "estimated_percent": round(concentration, 2),
+            "note": (
+                "This estimates concentration in token accounts, not "
+                "verified individual holders. Liquidity pools and special "
+                "accounts may affect the estimate."
+            )
+        }
+
+        report["ownership_data_complete"] = False
+        report["data_complete"] = True
+
+    except Exception as error:
+        report["warnings"].append(
+            "Safety checks incomplete: " + str(error)
+        )
 
     return report
 
