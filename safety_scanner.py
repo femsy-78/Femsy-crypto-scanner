@@ -90,12 +90,12 @@ def check_token_safety(mint_address):
             "authority": freeze_authority
         }
 
-    if mint_authority:
+        if mint_authority:
         report["warnings"].append(
             "Mint authority exists; additional tokens may be created."
         )
 
-    if freeze_authority:
+        if freeze_authority:
         report["warnings"].append(
             "Freeze authority exists; token accounts may be frozen."
         )
@@ -103,12 +103,12 @@ def check_token_safety(mint_address):
     # Read total token supply.
     supply = rpc_call("getTokenSupply", [mint_address])
 
-    if not supply:
+        if not supply:
         raise RuntimeError("Token supply data unavailable")
 
     total_raw = int(supply.get("amount", "0"))
 
-    if total_raw <= 0:
+        if total_raw <= 0:
         raise RuntimeError("Token supply is zero or unavailable")
 
     # Read the ten largest token accounts.
@@ -117,7 +117,7 @@ def check_token_safety(mint_address):
         [mint_address]
     )
 
-    if largest is None:
+       if largest is None:
         raise RuntimeError("Largest-account data unavailable")
 
     accounts = largest
