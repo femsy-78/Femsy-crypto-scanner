@@ -32,64 +32,61 @@ def rpc_call(method, params):
 
     with urllib.request.urlopen(request, timeout=20) as response:
         result = json.loads(response.read().decode("utf-8"))
-
     if "error" in result:
         raise RuntimeError(result["error"].get("message", "RPC error"))
 
     return result.get("result", {}).get("value")
 
 
-def  check_token_safety(mint_address):
-     """Inspect basic Solana token risks."""
+def check_token_safety(mint_address):
+    """Inspect basic Solana token risks."""
 
-     report = {
-        "mint_address": 
-     mint_address,
+    report = {
+        "mint_address": mint_address,
         "checks": {},
         "warnings": [],
         "data_complete": False,
-        "ownership_data_complete": 
-        False 
+        "ownership_data_complete": False
     }
 
-try:
-    # Read the token mint account.
-    account = rpc_call(
-        "getAccountInfo",
-        [
-            mint_address,
-            {"encoding": "jsonParsed", "commitment": "confirmed"}
-        ]
-    )
-
-    if not account:
-        report["warnings"].append(
-            "Mint account not found. Verify the token address."
+       try:
+        # Read the token mint account.
+        account = rpc_call(
+            "getAccountInfo",
+            [
+                mint_address,
+                {"encoding": "jsonParsed", "commitment": "confirmed"}
+            ]
         )
-        return report
 
-    parsed = account.get("data", {}).get("parsed", {})
-    info = parsed.get("info", {})
-    token_type = parsed.get("type")
+     if not account:
+            report["warnings"].append(
+                "Mint account not found. Verify the token address."
+            )
+            return report
 
-    if token_type != "mint":
-        report["warnings"].append(
-            "Account could not be verified as a token mint."
-        )
-        return report
+        parsed = account.get("data", {}).get("parsed", {})
+        info = parsed.get("info", {})
+        token_type = parsed.get("type")
 
-    mint_authority = info.get("mintAuthority")
-    freeze_authority = info.get("freezeAuthority")
+     if token_type != "mint":
+            report["warnings"].append(
+                "Account could not be verified as a token mint."
+            )
+            return report
 
-    report["checks"]["mint_authority"] = {
-        "status": "RISK" if mint_authority else "REVOKED",
-        "authority": mint_authority
-    }
+        mint_authority = info.get("mintAuthority")
+        freeze_authority = info.get("freezeAuthority")
 
-    report["checks"]["freeze_authority"] = {
-        "status": "RISK" if freeze_authority else "REVOKED",
-        "authority": freeze_authority
-    }
+        report["checks"]["mint_authority"] = {
+            "status": "RISK" if mint_authority else "REVOKED",
+            "authority": mint_authority
+        }
+
+        report["checks"]["freeze_authority"] = {
+            "status": "RISK" if freeze_authority else "REVOKED",
+            "authority": freeze_authority
+        }
 
     if mint_authority:
         report["warnings"].append(
