@@ -119,14 +119,10 @@ def check_token_safety(mint_address):
             [mint_address]
         )
 
-        if not isinstance(largest, dict):
+        if not isinstance(largest, list):
             raise RuntimeError("Largest-account data unavailable")
 
-        accounts = largest.get("value")
-
-        if not isinstance(accounts, list):
-            raise RuntimeError("Largest-account list unavailable")
-
+        accounts = largest
         top_raw = sum(
             int(item.get("amount", "0"))
             for item in accounts
