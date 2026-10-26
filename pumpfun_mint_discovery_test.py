@@ -190,7 +190,7 @@ def find_created_mints(transaction):
 def main():
     signatures = rpc_call(
         "getSignaturesForAddress",
-        [PUMP_FUN_PROGRAM, {"limit": 30}],
+        [PUMP_FUN_PROGRAM, {"limit": 100}],
     ) or []
 
     print("Recent Pump.fun transactions:", len(signatures))
