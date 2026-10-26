@@ -45,6 +45,7 @@ def main():
     print("Recent Pump.fun transactions:", len(signatures))
 
     discovered_mints = set()
+    print("Inspecting recent transaction instructions...")
 
     for entry in signatures:
         signature = entry.get("signature")
@@ -65,6 +66,13 @@ def main():
 
         if not transaction:
             continue
+                    message = transaction.get("transaction", {}).get("message", {})
+        print("Transaction account count:", len(message.get("accountKeys", [])))
+        print("Instruction count:", len(message.get("instructions", [])))
+
+        for instruction in message.get("instructions", []):
+            print("Instruction program:", instruction.get("programIdIndex"))
+            print("Instruction data:", str(instruction.get("data", ""))[:40])
 
         meta = transaction.get("meta") or {}
 
