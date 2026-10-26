@@ -1,24 +1,21 @@
 name: Pump.fun Mint Discovery Test
 
 'on':
-workflow_dispatch: {}
+workflow_dispatch:
 
 jobs:
 mint-discovery-test:
 runs-on: ubuntu-latest
-timeout-minutes: 5
-
 steps:
-  - name: Check out repository
-    uses: actions/checkout@v4
+- name: Check out repository
+uses: actions/checkout@v4
 
   - name: Set up Python
     uses: actions/setup-python@v5
     with:
-      python-version: "3.12"
+      python-version: '3.12'
 
   - name: Run mint discovery test
     env:
       HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}
-      PYTHONUNBUFFERED: "1"
     run: python pumpfun_mint_discovery_test.py
