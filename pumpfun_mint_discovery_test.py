@@ -66,21 +66,22 @@ def main():
 
         if not transaction:
             continue    
-       
-        for instruction in message.get("instructions", []):
-            print("Instruction program:", instruction.get("programIdIndex"))
-            print("Instruction data:", str(instruction.get("data", ""))[:40])
 
         meta = transaction.get("meta") or {}
 
         if meta.get("err") is not None:
             continue
 
-        message = transaction.get("transaction", {}).get(
+           message = transaction.get("transaction", {}).get(
             "message", {}
         )
 
-        keys = message.get("accountKeys", [])
+        for instruction in message.get("instructions", []):
+            print("Instruction program:", instruction.get("programIdIndex"))
+            print("Instruction data:", str(instruction.get("data", ""))[:40])
+
+        keys = message.get("accountKeys", []))
+        
         instructions = message.get("instructions", [])
 
         for instruction in instructions:
