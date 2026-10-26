@@ -55,12 +55,6 @@ def base58_decode(value):
     leading_zeros = len(value) - len(value.lstrip("1"))
     return b"\x00" * leading_zeros + raw
 
-    print("Pump.fun instruction data:", data)
-    print("Decoded discriminator:", decoded_data[:8].hex())
-    print("Known discriminators:", {
-            name: value.hex()
-            for value, name in CREATE_DISCRIMINATORS.items()
-        })
 def instruction_discriminator(name):
     return hashlib.sha256(
         f"global:{name}".encode("utf-8")
@@ -142,6 +136,15 @@ def find_created_mints(transaction):
 
         data = instruction.get("data", "")
         decoded_data = base58_decode(data)
+        print("Pump.fun instruction data:", data)
+        print("Decoded discriminator:", decoded_data[:8].hex())
+        print(
+            "Known discriminators:",
+            {
+                name: value.hex()
+                for value, name in CREATE_DISCRIMINATORS.items()
+            },
+        )
 
         if len(decoded_data) < 8:
             continue
