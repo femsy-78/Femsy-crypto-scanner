@@ -139,7 +139,7 @@ def main():
             ],
         )
 
-          if not transaction:
+        if not transaction:
             print("Transaction data unavailable:", signature)
             continue
 
