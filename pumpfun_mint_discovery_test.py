@@ -238,7 +238,8 @@ def main():
                 "Explorer:",
                 f"https://solscan.io/token/{mint}",
             )
-
+    print("Creation instructions matched:", sum(
+    1 for mint in unique_mints))
     print("Transactions checked:", checked)
     print("Unique creation candidates:", len(unique_mints))
     print("Discovery test completed.")
