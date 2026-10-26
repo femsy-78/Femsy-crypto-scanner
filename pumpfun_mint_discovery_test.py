@@ -5,7 +5,7 @@ import urllib.request
 API_KEY = os.environ.get("HELIUS_API_KEY")
 
 if not API_KEY:
-raise RuntimeError("HELIUS_API_KEY is missing")
+    raise RuntimeError("HELIUS_API_KEY is missing")
 
 RPC_URL = (
 "https://mainnet.helius-rpc.com/"
