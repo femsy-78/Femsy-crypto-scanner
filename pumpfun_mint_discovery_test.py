@@ -63,7 +63,7 @@ def instruction_discriminator(name):
 
 CREATE_DISCRIMINATORS = {
     instruction_discriminator("create"): "create",
-    instruction_discriminator("create_v2"): "create_v2",
+    bytes([86, 47, 157, 73, 202, 202, 173, 107]): "create_v2",
 }
 
 
@@ -159,32 +159,32 @@ def find_created_mints(transaction):
 
         accounts = instruction.get("accounts", [])
 
-        if not accounts:
-            continue
+if instruction_name == "create":
+    mint_index = 0
+elif instruction_name == "create_v2":
+    mint_index = 2
+else:
+    continue
 
-        first_account = accounts[0]
+if len(accounts) <= mint_index:
+    continue
 
-        if isinstance(first_account, int):
-            if first_account < 0 or first_account >= len(keys):
-                continue
+mint_account = accounts[mint_index]
 
-            mint = keys[first_account]
+if isinstance(mint_account, int):
+    if mint_account < 0 or mint_account >= len(keys):
+        continue
+    mint = keys[mint_account]
+elif isinstance(mint_account, str):
+    mint = mint_account
+else:
+    continue
 
-        elif isinstance(first_account, str):
-            # Raw JSON instructions normally use account indexes.
-            # If addresses are supplied directly, accept the address.
-            mint = first_account
-
-        else:
-            continue
-
-        if mint:
-            found.append({
-                "mint": mint,
-                "instruction": instruction_name,
-            })
-
-    return found
+if mint:
+    found.append({
+        "mint": mint,
+        "instruction": instruction_name,
+    })
 
 
 def main():
