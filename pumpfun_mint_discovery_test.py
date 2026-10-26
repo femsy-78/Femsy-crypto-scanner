@@ -159,29 +159,28 @@ def find_created_mints(transaction):
 
         accounts = instruction.get("accounts", [])
 
-if instruction_name == "create":
-    mint_index = 0
-elif instruction_name == "create_v2":
-    mint_index = 2
-else:
-    continue
+        if instruction_name == "create":
+            mint_index = 0
+        elif instruction_name == "create_v2":
+            mint_index = 2
+        else:
+            continue
+         if len(accounts) <= mint_index:
+             
+             continue
+             mint_account = accounts[mint_index]
 
-if len(accounts) <= mint_index:
-    continue
+         if isinstance(mint_account, int):
+         if mint_account < 0 or mint_account >= len(keys):
+             
+             continue
+             mint = keys[mint_account]
+       elif isinstance(mint_account, str):
+            mint = mint_account
+      else:
+  continue
 
-mint_account = accounts[mint_index]
-
-if isinstance(mint_account, int):
-    if mint_account < 0 or mint_account >= len(keys):
-        continue
-    mint = keys[mint_account]
-elif isinstance(mint_account, str):
-    mint = mint_account
-else:
-    continue
-
-if mint:
-    found.append({
+         if mint: found.append({
         "mint": mint,
         "instruction": instruction_name,
     })
