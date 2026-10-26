@@ -1,6 +1,6 @@
 name: Pump.fun Discovery Test
 
-on:
+"on":
 workflow_dispatch:
 
 jobs:
