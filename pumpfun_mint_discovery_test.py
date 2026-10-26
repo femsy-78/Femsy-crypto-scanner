@@ -7,14 +7,10 @@ API_KEY = os.environ.get("HELIUS_API_KEY")
 if not API_KEY:
     raise RuntimeError("HELIUS_API_KEY is missing")
 
-RPC_URL = (
-"https://mainnet.helius-rpc.com/"
-f"?api-key={API_KEY}"
-)
+RPC_URL = f"https://mainnet.helius-rpc.com/?api-key={API_KEY}"
 
-PUMP_FUN_PROGRAM = (
-"6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"
-)
+PUMP_FUN_PROGRAM = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"
+
 
 def rpc_call(method, params):
     payload = {
@@ -38,77 +34,48 @@ def rpc_call(method, params):
         raise RuntimeError(data["error"])
 
     return data.get("result")
+
+
 def main():
-signatures = rpc_call(
-"getSignaturesForAddress",
-[PUMP_FUN_PROGRAM, {"limit": 10}],
-) or []
+    signatures = rpc_call(
+        "getSignaturesForAddress",
+        [PUMP_FUN_PROGRAM, {"limit": 10}],
+    ) or []
 
-print("Recent Pump.fun transactions:", len(signatures))
+    print("Recent Pump.fun transactions:", len(signatures))
 
-discovered = set()
+    for entry in signatures:
+        signature = entry.get("signature")
 
-for entry in signatures:
-    signature = entry.get("signature")
-
-    if not signature:
-        continue
-
-    transaction = rpc_call(
-        "getTransaction",
-        [
-            signature,
-            {
-                "encoding": "jsonParsed",
-                "maxSupportedTransactionVersion": 0,
-            },
-        ],
-    )
-
-    if not transaction:
-        continue
-
-    message = (
-        transaction.get("transaction", {})
-        .get("message", {})
-    )
-
-    account_keys = message.get("accountKeys", [])
-
-    for account in account_keys:
-        if isinstance(account, dict):
-            address = account.get("pubkey")
-        else:
-            address = account
-
-        if address:
-            discovered.add(address)
-
-    for instruction in message.get("instructions", []):
-        program_id = instruction.get("programId")
-
-        if program_id != PUMP_FUN_PROGRAM:
+        if not signature:
             continue
 
-        parsed = instruction.get("parsed")
+        transaction = rpc_call(
+            "getTransaction",
+            [
+                signature,
+                {
+                    "encoding": "jsonParsed",
+                    "maxSupportedTransactionVersion": 0,
+                },
+            ],
+        )
 
-        if isinstance(parsed, dict):
-            info = parsed.get("info", {})
+        if not transaction:
+            continue
 
-            mint = info.get("mint")
-            if mint:
-                discovered.add(mint)
+        message = transaction.get("transaction", {}).get("message", {})
+        account_keys = message.get("accountKeys", [])
 
-print("Unique addresses examined:", len(discovered))
-print("Candidate addresses:")
+        print("Transaction:", signature)
+        print("Accounts examined:", len(account_keys))
 
-for address in sorted(discovered):
-    print(address)
+    print("Discovery test completed.")
+    print(
+        "Note: This test retrieves recent transactions; "
+        "it does not yet verify newly created token mints."
+    )
 
-print(
-    "NOTE: These are candidate addresses, "
-    "not verified newly created token mints."
-)
 
-if name == "main":
-main()
+if __name__ == "__main__":
+    main()
