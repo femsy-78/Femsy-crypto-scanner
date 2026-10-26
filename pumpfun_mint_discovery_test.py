@@ -45,11 +45,9 @@ def main():
     print("Recent Pump.fun transactions:", len(signatures))
 
     discovered_mints = set()
-    print("Inspecting recent transaction instructions...")
 
     for entry in signatures:
         signature = entry.get("signature")
-
         if not signature:
             continue
 
@@ -65,98 +63,39 @@ def main():
         )
 
         if not transaction:
-            continue    
+            continue
 
         meta = transaction.get("meta") or {}
-
         if meta.get("err") is not None:
             continue
 
-           message = transaction.get("transaction", {}).get(
+        message = transaction.get("transaction", {}).get(
             "message", {}
         )
 
-        for instruction in message.get("instructions", []):
-            print("Instruction program:", instruction.get("programIdIndex"))
-            print("Instruction data:", str(instruction.get("data", ""))[:40])
-
-        keys = message.get("accountKeys", []))
-        
+        keys = message.get("accountKeys", [])
         instructions = message.get("instructions", [])
 
+        print("Transaction account count:", len(keys))
+        print("Transaction instruction count:", len(instructions))
+
         for instruction in instructions:
-            program_id_index = instruction.get("programIdIndex")
-
-            if program_id_index is None:
+            program_index = instruction.get("programIdIndex")
+            if program_index is None or program_index >= len(keys):
                 continue
 
-            if program_id_index >= len(keys):
-                continue
-
-            program_id = keys[program_id_index]
-
+            program_id = keys[program_index]
             if isinstance(program_id, dict):
                 program_id = program_id.get("pubkey")
 
-            if program_id != PUMP_FUN_PROGRAM:
-                continue
-
-            account_indexes = instruction.get("accounts", [])
-
-            # Pump.fun create instructions commonly include the
-            # mint as the second account. Verify the instruction
-            # discriminator before accepting that account.
-            raw_data = instruction.get("data", "")
-
-            if not isinstance(raw_data, str):
-                continue
-
-            try:
-                import base64
-
-                decoded = base64.b64decode(
-                    raw_data + "=" * (-len(raw_data) % 4)
+            if program_id == PUMP_FUN_PROGRAM:
+                print(
+                    "Pump.fun instruction data:",
+                    str(instruction.get("data", ""))[:40],
                 )
-            except Exception:
-                continue
-
-            # Anchor instruction discriminator for "create":
-            # first 8 bytes of SHA256("global:create").
-            import hashlib
-
-            create_discriminator = hashlib.sha256(
-                b"global:create"
-            ).digest()[:8]
-
-            if decoded[:8] != create_discriminator:
-                continue
-
-            if len(account_indexes) < 2:
-                continue
-
-            mint_index = account_indexes[0]
-
-            if isinstance(mint_index, dict):
-                mint_address = mint_index.get("pubkey")
-            elif isinstance(mint_index, int) and mint_index < len(keys):
-                mint_address = keys[mint_index]
-                if isinstance(mint_address, dict):
-                    mint_address = mint_address.get("pubkey")
-            else:
-                mint_address = None
-
-            if mint_address:
-                discovered_mints.add(mint_address)
 
     print("Candidate token mints:", len(discovered_mints))
-
-    for mint in sorted(discovered_mints):
-        print("Mint:", mint)
-
-    print(
-        "Note: Validate each candidate against transaction "
-        "account ordering before using it for trading alerts."
-    )
+    print("Diagnostic test completed.")
 
 
 if __name__ == "__main__":
