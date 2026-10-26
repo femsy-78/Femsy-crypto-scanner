@@ -65,11 +65,8 @@ def main():
         )
 
         if not transaction:
-            continue
-                    message = transaction.get("transaction", {}).get("message", {})
-        print("Transaction account count:", len(message.get("accountKeys", [])))
-        print("Instruction count:", len(message.get("instructions", [])))
-
+            continue    
+       
         for instruction in message.get("instructions", []):
             print("Instruction program:", instruction.get("programIdIndex"))
             print("Instruction data:", str(instruction.get("data", ""))[:40])
