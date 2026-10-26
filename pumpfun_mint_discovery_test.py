@@ -82,6 +82,9 @@ def main():
             print("Program ID:", program_id)
             print("Instruction data:", instruction.get("data", ""))
             print("Account indexes:", instruction.get("accounts", []))
+                    print("Transaction account keys:")
+        for i, key in enumerate(keys):
+            print(i, key)
 
     print("Diagnostic test completed.")
 
