@@ -17,28 +17,27 @@ PUMP_FUN_PROGRAM = (
 )
 
 def rpc_call(method, params):
-payload = {
-"jsonrpc": "2.0",
-"id": 1,
-"method": method,
-"params": params,
-}
+    payload = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": method,
+        "params": params,
+    }
 
-request = urllib.request.Request(
-    RPC_URL,
-    data=json.dumps(payload).encode("utf-8"),
-    headers={"Content-Type": "application/json"},
-    method="POST",
-)
+    request = urllib.request.Request(
+        RPC_URL,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
 
-with urllib.request.urlopen(request, timeout=30) as response:
-    data = json.loads(response.read().decode("utf-8"))
+    with urllib.request.urlopen(request, timeout=30) as response:
+        data = json.loads(response.read().decode("utf-8"))
 
-if "error" in data:
-    raise RuntimeError(data["error"])
+    if "error" in data:
+        raise RuntimeError(data["error"])
 
-return data.get("result")
-
+    return data.get("result")
 def main():
 signatures = rpc_call(
 "getSignaturesForAddress",
