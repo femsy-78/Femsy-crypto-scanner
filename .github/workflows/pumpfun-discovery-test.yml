@@ -1,0 +1,24 @@
+name: Pump.fun Discovery Test
+
+on:
+workflow_dispatch:
+
+jobs:
+test-discovery:
+runs-on: ubuntu-latest
+timeout-minutes: 3
+
+steps:
+  - name: Check out repository
+    uses: actions/checkout@v4
+
+  - name: Set up Python
+    uses: actions/setup-python@v5
+    with:
+      python-version: "3.12"
+
+  - name: Test Pump.fun program access
+    env:
+      HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}
+      PYTHONUNBUFFERED: "1"
+    run: python pumpfun_discovery_test.py
