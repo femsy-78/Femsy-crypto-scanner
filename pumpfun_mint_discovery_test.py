@@ -78,6 +78,8 @@ def main():
 
         print("Transaction account count:", len(keys))
         print("Transaction instruction count:", len(instructions))
+                for instruction in instructions:
+            print("Instruction:", instruction)
 
         for instruction in instructions:
             program_index = instruction.get("programIdIndex")
