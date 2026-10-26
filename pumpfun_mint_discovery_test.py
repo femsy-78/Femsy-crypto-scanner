@@ -1,7 +1,7 @@
 import os
 import json
+import hashlib
 import urllib.request
-import urllib.error
 
 API_KEY = os.environ.get("HELIUS_API_KEY")
 
@@ -37,6 +37,37 @@ def rpc_call(method, params):
     return result.get("result")
 
 
+def base58_decode(value):
+    alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+    number = 0
+
+    for char in value:
+        if char not in alphabet:
+            return b""
+        number = number * 58 + alphabet.index(char)
+
+    raw = (
+        number.to_bytes((number.bit_length() + 7) // 8, "big")
+        if number
+        else b""
+    )
+
+    leading_zeros = len(value) - len(value.lstrip("1"))
+    return b"\x00" * leading_zeros + raw
+
+
+def instruction_discriminator(name):
+    return hashlib.sha256(
+        f"global:{name}".encode("utf-8")
+    ).digest()[:8]
+
+
+CREATE_DISCRIMINATORS = {
+    instruction_discriminator("create"): "create",
+    instruction_discriminator("create_v2"): "create_v2",
+}
+
+
 def get_account_keys(transaction):
     message = transaction.get("transaction", {}).get(
         "message", {}
@@ -44,11 +75,20 @@ def get_account_keys(transaction):
 
     keys = message.get("accountKeys", [])
 
-    # Some RPC responses return account keys as objects.
-    return [
+    # Support account keys represented as strings or objects.
+    keys = [
         key.get("pubkey", "") if isinstance(key, dict) else key
         for key in keys
     ]
+
+    # Include addresses loaded through address lookup tables.
+    meta = transaction.get("meta") or {}
+    loaded = meta.get("loadedAddresses") or {}
+
+    keys.extend(loaded.get("writable", []))
+    keys.extend(loaded.get("readonly", []))
+
+    return keys
 
 
 def get_all_instructions(transaction):
@@ -60,67 +100,95 @@ def get_all_instructions(transaction):
 
     meta = transaction.get("meta") or {}
 
-    for inner_group in meta.get("innerInstructions") or []:
-        instructions.extend(inner_group.get("instructions", []))
+    for group in meta.get("innerInstructions") or []:
+        instructions.extend(group.get("instructions", []))
 
     return instructions
 
 
 def find_created_mints(transaction):
+    meta = transaction.get("meta") or {}
+
+    # Never report token candidates from failed transactions.
+    if meta.get("err") is not None:
+        return []
+
     keys = get_account_keys(transaction)
     instructions = get_all_instructions(transaction)
-    mints = set()
+    found = []
 
     for instruction in instructions:
         program_id = instruction.get("programId")
 
         if not program_id:
-            index = instruction.get("programIdIndex")
+            program_index = instruction.get("programIdIndex")
 
-            if index is not None and index < len(keys):
-                program_id = keys[index]
+            if (
+                program_index is None
+                or program_index < 0
+                or program_index >= len(keys)
+            ):
+                continue
+
+            program_id = keys[program_index]
 
         if program_id != PUMP_FUN_PROGRAM:
             continue
 
-        account_indexes = instruction.get("accounts", [])
+        data = instruction.get("data", "")
+        decoded_data = base58_decode(data)
 
-        # Parsed instructions may provide account addresses directly.
-        if account_indexes and isinstance(account_indexes[0], str):
-            mint = account_indexes[0]
+        if len(decoded_data) < 8:
+            continue
 
-        # Raw JSON instructions provide account indexes.
-        elif account_indexes and isinstance(account_indexes[0], int):
-            mint_index = account_indexes[0]
+        instruction_name = CREATE_DISCRIMINATORS.get(
+            decoded_data[:8]
+        )
 
-            if mint_index >= len(keys):
+        # Ignore buys, sells, and all other Pump.fun instructions.
+        if instruction_name is None:
+            continue
+
+        accounts = instruction.get("accounts", [])
+
+        if not accounts:
+            continue
+
+        first_account = accounts[0]
+
+        if isinstance(first_account, int):
+            if first_account < 0 or first_account >= len(keys):
                 continue
 
-            mint = keys[mint_index]
+            mint = keys[first_account]
+
+        elif isinstance(first_account, str):
+            # Raw JSON instructions normally use account indexes.
+            # If addresses are supplied directly, accept the address.
+            mint = first_account
 
         else:
             continue
 
-        instruction_data = instruction.get("data", "")
-
-        # Report candidates for verification rather than assuming
-        # every Pump.fun instruction creates a token.
         if mint:
-            mints.add((mint, instruction_data))
+            found.append({
+                "mint": mint,
+                "instruction": instruction_name,
+            })
 
-    return mints
+    return found
 
 
 def main():
     signatures = rpc_call(
         "getSignaturesForAddress",
-        [PUMP_FUN_PROGRAM, {"limit": 20}],
+        [PUMP_FUN_PROGRAM, {"limit": 30}],
     ) or []
 
     print("Recent Pump.fun transactions:", len(signatures))
 
-    discovered = set()
     checked = 0
+    unique_mints = {}
 
     for entry in signatures:
         signature = entry.get("signature")
@@ -147,16 +215,24 @@ def main():
 
         candidates = find_created_mints(transaction)
 
-        for mint, instruction_data in candidates:
-            discovered.add(mint)
+        for candidate in candidates:
+            mint = candidate["mint"]
 
-            print("Candidate mint:", mint)
+            if mint in unique_mints:
+                continue
+
+            unique_mints[mint] = signature
+
+            print("Pump.fun creation candidate:", mint)
+            print("Instruction:", candidate["instruction"])
             print("Transaction:", signature)
-            print("Instruction data:", instruction_data)
-            print("Verify this candidate before treating it as a new token.")
+            print(
+                "Explorer:",
+                f"https://solscan.io/token/{mint}",
+            )
 
     print("Transactions checked:", checked)
-    print("Unique candidate mints:", len(discovered))
+    print("Unique creation candidates:", len(unique_mints))
     print("Discovery test completed.")
 
 
