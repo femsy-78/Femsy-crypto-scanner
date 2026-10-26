@@ -136,15 +136,6 @@ def find_created_mints(transaction):
 
         data = instruction.get("data", "")
         decoded_data = base58_decode(data)
-        print("Pump.fun instruction data:", data)
-        print("Decoded discriminator:", decoded_data[:8].hex())
-        print(
-            "Known discriminators:",
-            {
-                name: value.hex()
-                for value, name in CREATE_DISCRIMINATORS.items()
-            },
-        )
 
         if len(decoded_data) < 8:
             continue
@@ -153,11 +144,11 @@ def find_created_mints(transaction):
             decoded_data[:8]
         )
 
-        # Ignore buys, sells, and all other Pump.fun instructions.
+        # Ignore buys, sells, and other Pump.fun instructions.
         if instruction_name is None:
             continue
 
-                accounts = instruction.get("accounts", [])
+        accounts = instruction.get("accounts", [])
 
         if instruction_name == "create":
             mint_index = 0
@@ -185,6 +176,8 @@ def find_created_mints(transaction):
                 "mint": mint,
                 "instruction": instruction_name,
             })
+
+    return found
 
 def main():
     signatures = rpc_call(
