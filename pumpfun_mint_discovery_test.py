@@ -8,7 +8,6 @@ if not API_KEY:
     raise RuntimeError("HELIUS_API_KEY is missing")
 
 RPC_URL = f"https://mainnet.helius-rpc.com/?api-key={API_KEY}"
-
 PUMP_FUN_PROGRAM = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"
 
 
@@ -28,12 +27,12 @@ def rpc_call(method, params):
     )
 
     with urllib.request.urlopen(request, timeout=30) as response:
-        data = json.loads(response.read().decode("utf-8"))
+        result = json.loads(response.read().decode("utf-8"))
 
-    if "error" in data:
-        raise RuntimeError(data["error"])
+    if "error" in result:
+        raise RuntimeError(result["error"])
 
-    return data.get("result")
+    return result.get("result")
 
 
 def main():
@@ -43,8 +42,6 @@ def main():
     ) or []
 
     print("Recent Pump.fun transactions:", len(signatures))
-
-    discovered_mints = set()
 
     for entry in signatures:
         signature = entry.get("signature")
@@ -65,47 +62,29 @@ def main():
         if not transaction:
             continue
 
-        meta = transaction.get("meta") or {}
-        if meta.get("err") is not None:
-            continue
-
         message = transaction.get("transaction", {}).get(
             "message", {}
         )
-
         keys = message.get("accountKeys", [])
         instructions = message.get("instructions", [])
 
         print("Transaction account count:", len(keys))
         print("Transaction instruction count:", len(instructions))
+
         for instruction in instructions:
-            program_index = instruction.get("programIdIndex")
+            index = instruction.get("programIdIndex")
 
-            if program_index is not None and program_index < len(keys):
-                program_id = keys[program_index]
-            else:
-                program_id = "UNKNOWN"
+            if index is None or index >= len(keys):
+                continue
 
-            if isinstance(program_id, dict):
-                program_id = program_id.get("pubkey")
+            program_id = keys[index]
 
             print("Program ID:", program_id)
             print("Instruction data:", instruction.get("data", ""))
             print("Account indexes:", instruction.get("accounts", []))
-                  for instruction in instructions:
-            program_index = instruction.get("programIdIndex")
 
-            if program_index is not None and program_index < len(keys):
-                program_id = keys[program_index]
-            else:
-                program_id = "UNKNOWN"
+    print("Diagnostic test completed.")
 
-            if isinstance(program_id, dict):
-                program_id = program_id.get("pubkey")
-
-            print("Program ID:", program_id)
-            print("Instruction data:", instruction.get("data", ""))
-            print("Account indexes:", instruction.get("accounts", []))
 
 if __name__ == "__main__":
     main()
