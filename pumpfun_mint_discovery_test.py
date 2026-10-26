@@ -157,7 +157,7 @@ def find_created_mints(transaction):
         if instruction_name is None:
             continue
 
-        accounts = instruction.get("accounts", [])
+                accounts = instruction.get("accounts", [])
 
         if instruction_name == "create":
             mint_index = 0
@@ -165,26 +165,26 @@ def find_created_mints(transaction):
             mint_index = 2
         else:
             continue
-         if len(accounts) <= mint_index:
-             
-             continue
-             mint_account = accounts[mint_index]
 
-         if isinstance(mint_account, int):
-         if mint_account < 0 or mint_account >= len(keys):
-             
-             continue
-             mint = keys[mint_account]
-       elif isinstance(mint_account, str):
+        if len(accounts) <= mint_index:
+            continue
+
+        mint_account = accounts[mint_index]
+
+        if isinstance(mint_account, int):
+            if mint_account < 0 or mint_account >= len(keys):
+                continue
+            mint = keys[mint_account]
+        elif isinstance(mint_account, str):
             mint = mint_account
-      else:
-  continue
+        else:
+            continue
 
-         if mint: found.append({
-        "mint": mint,
-        "instruction": instruction_name,
-    })
-
+        if mint:
+            found.append({
+                "mint": mint,
+                "instruction": instruction_name,
+            })
 
 def main():
     signatures = rpc_call(
