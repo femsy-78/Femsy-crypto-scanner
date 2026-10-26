@@ -79,17 +79,14 @@ def main():
         print("Transaction account count:", len(keys))
         print("Transaction instruction count:", len(instructions))
         for instruction in instructions:
-            program_index = instruction.get("programIdIndex")
-
-program_id = (
-    keys[program_index]
-    if program_index is not None and program_index < len(keys)
-    else "UNKNOWN"
-)
-
-print("Program ID:", program_id)
-print("Instruction data:", instruction.get("data", ""))
-print("Account indexes:", instruction.get("accounts", []))
+        program_index = instruction.get("programIdIndex")
+        program_id = (keys[program_index]
+        if program_index is not None and program_index < len(keys)
+        else "UNKNOWN"
+                     )
+        print("Program ID:", program_id)
+        print("Instruction data:", instruction.get("data", ""))
+        print("Account indexes:", instruction.get("accounts", []))
         for instruction in instructions:
             program_index = instruction.get("programIdIndex")
             if program_index is None or program_index >= len(keys):
