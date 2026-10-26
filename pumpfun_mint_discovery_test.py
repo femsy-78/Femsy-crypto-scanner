@@ -92,24 +92,20 @@ def main():
             print("Program ID:", program_id)
             print("Instruction data:", instruction.get("data", ""))
             print("Account indexes:", instruction.get("accounts", []))
-        for instruction in instructions:
+          for instruction in instructions:
             program_index = instruction.get("programIdIndex")
-            if program_index is None or program_index >= len(keys):
-                continue
 
-            program_id = keys[program_index]
+            if program_index is not None and program_index < len(keys):
+                program_id = keys[program_index]
+            else:
+                program_id = "UNKNOWN"
+
             if isinstance(program_id, dict):
                 program_id = program_id.get("pubkey")
 
-            if program_id == PUMP_FUN_PROGRAM:
-                print(
-                    "Pump.fun instruction data:",
-                    str(instruction.get("data", ""))[:40],
-                )
-
-    print("Candidate token mints:", len(discovered_mints))
-    print("Diagnostic test completed.")
-
+            print("Program ID:", program_id)
+            print("Instruction data:", instruction.get("data", ""))
+            print("Account indexes:", instruction.get("accounts", []))
 
 if __name__ == "__main__":
     main()
