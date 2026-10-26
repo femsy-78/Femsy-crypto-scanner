@@ -92,7 +92,7 @@ def main():
             print("Program ID:", program_id)
             print("Instruction data:", instruction.get("data", ""))
             print("Account indexes:", instruction.get("accounts", []))
-          for instruction in instructions:
+                  for instruction in instructions:
             program_index = instruction.get("programIdIndex")
 
             if program_index is not None and program_index < len(keys):
