@@ -352,18 +352,11 @@ def main():
         print("Transaction:", signature)
         print("Explorer:", f"https://solscan.io/token/{mint}")
         print("DexScreener:", market_data["pair_url"])
-        print("Instruction:", candidate["instruction"])
-        print("Transaction:", signature)
-        print(
-                "Explorer:",
-                f"https://solscan.io/token/{mint}",
-            )
-        print("Creation instructions matched:", sum(
-            1 for mint in unique_mints))
-        print("Transactions checked:", checked)
-        print("Unique creation candidates:", len(unique_mints))
-        print("Discovery test completed.")
-
+        
+    print("Creation instructions matched:", len(unique_mints))
+    print("Transactions checked:", checked)
+    print("Unique creation candidates:", len(unique_mints))
+    print("Discovery test completed.")
 
 if __name__ == "__main__":
     main()
