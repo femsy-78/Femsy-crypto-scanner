@@ -88,8 +88,9 @@ def instruction_discriminator(name):
 
 
 CREATE_DISCRIMINATORS = {
-    instruction_discriminator("create"): "create",
-    instruction_discriminator("createV2"): "create_v2",
+    bytes.fromhex("181ec828051c0777"): "create",
+    bytes.fromhex("33e685a4017f83ad"): "create_v2",
+    bytes.fromhex("d6904cec5f8b31b4"): "create_v2",
 }
 
 
