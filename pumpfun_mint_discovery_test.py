@@ -63,7 +63,7 @@ def instruction_discriminator(name):
 
 CREATE_DISCRIMINATORS = {
     instruction_discriminator("create"): "create",
-    instruction_discriminator("create_v2"): "create_v2",
+    instruction_discriminator("createV2"): "create_v2",
 }
 
 
