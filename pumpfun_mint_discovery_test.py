@@ -143,6 +143,11 @@ def find_created_mints(transaction):
         instruction_name = CREATE_DISCRIMINATORS.get(
             decoded_data[:8]
         )
+        print("Decoded discriminator:", decoded_data[:8].hex())
+        print(
+        "Known discriminators:",
+        [key.hex() for key in CREATE_DISCRIMINATORS],
+        )
 
         # Ignore buys, sells, and other Pump.fun instructions.
         if instruction_name is None:
