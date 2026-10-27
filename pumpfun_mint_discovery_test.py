@@ -357,5 +357,5 @@ print("Transactions checked:", checked)
 print("Unique qualifying candidates:", len(unique_mints))
 print("Discovery test completed.")
 
-if name == "main":
-main()
+if __name__ == "__main__":
+    main()
