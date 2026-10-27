@@ -333,12 +333,28 @@ def main():
             if mint in unique_mints:
                 continue
 
-            unique_mints[mint] = signature
+            market_data = get_dexscreener_data(mint)
 
-            print("Pump.fun creation candidate:", mint)
-            print("Instruction:", candidate["instruction"])
-            print("Transaction:", signature)
-            print(
+        if not market_data:
+            print("UNVERIFIED — skipping token:", mint)
+            continue
+
+        if not qualifies_for_market_filter(market_data):
+            print("REJECTED — market filters:", mint)
+            print("Market data:", market_data)
+            continue
+
+        unique_mints[mint] = signature
+
+        print("QUALIFIED — market filters passed:", mint)
+        print("Market data:", market_data)
+        print("Instruction:", candidate["instruction"])
+        print("Transaction:", signature)
+        print("Explorer:", f"https://solscan.io/token/{mint}")
+        print("DexScreener:", market_data["pair_url"])
+        print("Instruction:", candidate["instruction"])
+        print("Transaction:", signature)
+        print(
                 "Explorer:",
                 f"https://solscan.io/token/{mint}",
             )
