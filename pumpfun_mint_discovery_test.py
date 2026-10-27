@@ -297,65 +297,65 @@ def main():
         [PUMP_FUN_PROGRAM, {"limit": 100}],
     ) or []
 
-print("Recent Pump.fun transactions:", len(signatures))
+    print("Recent Pump.fun transactions:", len(signatures))
 
-checked = 0
-unique_mints = {}
+    checked = 0
+    unique_mints = {}
 
-for entry in signatures:
-    signature = entry.get("signature")
+    for entry in signatures:
+        signature = entry.get("signature")
 
-    if not signature or entry.get("err"):
-        continue
-
-    transaction = rpc_call(
-        "getTransaction",
-        [
-            signature,
-            {
-                "encoding": "json",
-                "maxSupportedTransactionVersion": 1,
-            },
-        ],
-    )
-
-    if not transaction:
-        print("Transaction data unavailable:", signature)
-        continue
-
-    checked += 1
-    candidates = find_created_mints(transaction)
-
-    for candidate in candidates:
-        mint = candidate["mint"]
-
-        if mint in unique_mints:
+        if not signature or entry.get("err"):
             continue
 
-        market_data = get_dexscreener_data(mint)
+        transaction = rpc_call(
+            "getTransaction",
+            [
+                signature,
+                {
+                    "encoding": "json",
+                    "maxSupportedTransactionVersion": 1,
+                },
+            ],
+        )
 
-        if not market_data:
-            print("UNVERIFIED — skipping token:", mint)
+        if not transaction:
+            print("Transaction data unavailable:", signature)
             continue
 
-        if not qualifies_for_market_filter(market_data):
-            print("REJECTED — market filters:", mint)
+        checked += 1
+        candidates = find_created_mints(transaction)
+
+        for candidate in candidates:
+            mint = candidate["mint"]
+
+            if mint in unique_mints:
+                continue
+
+            market_data = get_dexscreener_data(mint)
+
+            if not market_data:
+                print("UNVERIFIED — skipping token:", mint)
+                continue
+
+            if not qualifies_for_market_filter(market_data):
+                print("REJECTED — market filters:", mint)
+                print("Market data:", market_data)
+                continue
+
+            unique_mints[mint] = signature
+
+            print("QUALIFIED — market filters passed:", mint)
             print("Market data:", market_data)
-            continue
+            print("Instruction:", candidate["instruction"])
+            print("Transaction:", signature)
+            print("Explorer:", f"https://solscan.io/token/{mint}")
+            print("DexScreener:", market_data["pair_url"])
 
-        unique_mints[mint] = signature
+    print("Transactions checked:", checked)
+    print("Unique qualifying candidates:", len(unique_mints))
+    print("Discovery test completed.")
 
-        print("QUALIFIED — market filters passed:", mint)
-        print("Market data:", market_data)
-        print("Instruction:", candidate["instruction"])
-        print("Transaction:", signature)
-        print("Explorer:", f"https://solscan.io/token/{mint}")
-        print("DexScreener:", market_data["pair_url"])
-
-print("Creation instructions matched:", len(unique_mints))
-print("Transactions checked:", checked)
-print("Unique qualifying candidates:", len(unique_mints))
-print("Discovery test completed.")
 
 if __name__ == "__main__":
     main()
