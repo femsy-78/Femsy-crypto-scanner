@@ -153,7 +153,15 @@ def get_dexscreener_data(mint):
     )
 
     liquidity = (pair.get("liquidity") or {}).get("usd")
-    print("DEBUG — liquidity field:", pair.get("liquidity"))
+
+    print("DEBUG — pair address:", pair.get("pairAddress"))
+    print("DEBUG — DEX ID:", pair.get("dexId"))
+    print("DEBUG — liquidity object:", pair.get("liquidity"))
+    print("DEBUG — pair type:", pair.get("labels"))
+    print("DEBUG — market cap:", pair.get("marketCap"))
+    print("DEBUG — FDV:", pair.get("fdv"))
+    print("DEBUG — volume:", pair.get("volume"))
+
     market_cap = pair.get("marketCap")
     if market_cap is None:
         market_cap = pair.get("fdv")
