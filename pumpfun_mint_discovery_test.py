@@ -1,7 +1,8 @@
 import os
 import json
 import hashlib
-import urllib.request
+import time
+import urllib.error
 
 API_KEY = os.environ.get("HELIUS_API_KEY")
 
@@ -28,13 +29,37 @@ def rpc_call(method, params):
         method="POST",
     )
 
-    with urllib.request.urlopen(request, timeout=30) as response:
-        result = json.loads(response.read().decode("utf-8"))
+    for attempt in range(5):
+        try:
+            with urllib.request.urlopen(
+                request, timeout=30
+            ) as response:
+                result = json.loads(
+                    response.read().decode("utf-8")
+                )
 
-    if "error" in result:
-        raise RuntimeError(f"Helius RPC error: {result['error']}")
+            if "error" in result:
+                raise RuntimeError(
+                    f"Helius RPC error: {result['error']}"
+                )
 
-    return result.get("result")
+            return result.get("result")
+
+        except urllib.error.HTTPError as error:
+            if error.code != 429 or attempt == 4:
+                raise
+
+            retry_after = error.headers.get("Retry-After")
+            try:
+                wait_seconds = float(retry_after) if retry_after else 5 * (attempt + 1)
+            except ValueError:
+                wait_seconds = 5 * (attempt + 1)
+
+            print(
+                f"Helius rate limit (429). "
+                f"Retrying in {wait_seconds:g} seconds..."
+            )
+            time.sleep(wait_seconds)
 
 
 def base58_decode(value):
