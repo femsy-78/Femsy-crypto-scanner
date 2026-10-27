@@ -116,6 +116,86 @@ def get_account_keys(transaction):
 
     return keys
 
+def get_dexscreener_data(mint):
+    """Retrieve market data for a token from DexScreener."""
+    url = f"https://api.dexscreener.com/latest/dex/tokens/{mint}"
+
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": "FemsySolanaScanner/1.0"},
+    )
+
+    try:
+        with urllib.request.urlopen(request, timeout=15) as response:
+            data = json.loads(response.read().decode("utf-8"))
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
+        print(f"Market data unavailable for {mint}: {error}")
+        return None
+
+    pairs = data.get("pairs") or []
+
+    # Only consider Solana pairs for this token.
+    pairs = [
+        pair for pair in pairs
+        if pair.get("chainId") == "solana"
+    ]
+
+    if not pairs:
+        print(f"UNVERIFIED — no DexScreener pair found: {mint}")
+        return None
+
+    # Use the pair with the greatest reported USD liquidity.
+    pair = max(
+        pairs,
+        key=lambda item: (
+            (item.get("liquidity") or {}).get("usd") or 0
+        ),
+    )
+
+    liquidity = (pair.get("liquidity") or {}).get("usd")
+    market_cap = pair.get("marketCap")
+    if market_cap is None:
+        market_cap = pair.get("fdv")
+
+    volume_5m = (pair.get("volume") or {}).get("m5")
+    created_at = pair.get("pairCreatedAt")
+
+    age_minutes = None
+    if created_at:
+        age_minutes = (time.time() * 1000 - created_at) / 60000
+
+    return {
+        "mint": mint,
+        "age_minutes": age_minutes,
+        "market_cap": market_cap,
+        "liquidity": liquidity,
+        "volume_5m": volume_5m,
+        "pair_url": pair.get("url"),
+    }
+
+
+def qualifies_for_market_filter(item):
+    """Return True only when all four market filters pass."""
+    if not item:
+        return False
+
+    age = item.get("age_minutes")
+    market_cap = item.get("market_cap")
+    liquidity = item.get("liquidity")
+    volume = item.get("volume_5m")
+
+    if any(value is None for value in (
+        age, market_cap, liquidity, volume
+    )):
+        return False
+
+    return (
+        5 <= age <= 15
+        and 20_000 <= market_cap <= 30_000
+        and 25_000 <= liquidity <= 80_000
+        and 80_000 <= volume <= 200_000
+    )
+
 
 def get_all_instructions(transaction):
     message = transaction.get("transaction", {}).get(
