@@ -441,43 +441,43 @@ def main():
         for candidate in candidates:
             mint = candidate["mint"]
 
-         if mint in unique_mints:
-                continue
+        if mint in unique_mints:
+            continue
 
-            print("Checking bonding curve for:", mint)
-            curve_account = get_bonding_curve_account(mint)
+        print("Checking bonding curve for:", mint)
+        curve_account = get_bonding_curve_account(mint)
 
-         if curve_account:
-                decoded_curve = decode_bonding_curve_account(
-                    curve_account
-                )
+        if curve_account:
+            decoded_curve = decode_bonding_curve_account(
+                curve_account
+            )
 
-         if decoded_curve:
-                    print("Bond complete:", decoded_curve["complete"])
-                else:
-                    print("Bonding-curve decoding failed:", mint)
+            if decoded_curve:
+                print("Bond complete:", decoded_curve["complete"])
             else:
-                print("Bonding-curve account not verified:", mint)
+                print("Bonding-curve decoding failed:", mint)
+        else:
+            print("Bonding-curve account not verified:", mint)
 
-            market_data = get_dexscreener_data(mint)
+        market_data = get_dexscreener_data(mint)
 
-            if not market_data:
-                print("UNVERIFIED — skipping token:", mint)
-                continue
+        if not market_data:
+            print("UNVERIFIED — skipping token:", mint)
+            continue
 
-            if not qualifies_for_market_filter(market_data):
-                print("REJECTED — market filters:", mint)
-                print("Market data:", market_data)
-                continue
-
-            unique_mints[mint] = signature
-
-            print("QUALIFIED — market filters passed:", mint)
+        if not qualifies_for_market_filter(market_data):
+            print("REJECTED — market filters:", mint)
             print("Market data:", market_data)
-            print("Instruction:", candidate["instruction"])
-            print("Transaction:", signature)
-            print("Explorer:", f"https://solscan.io/token/{mint}")
-            print("DexScreener:", market_data["pair_url"])
+            continue
+
+        unique_mints[mint] = signature
+
+        print("QUALIFIED — market filters passed:", mint)
+        print("Market data:", market_data)
+        print("Instruction:", candidate["instruction"])
+        print("Transaction:", signature)
+        print("Explorer:", f"https://solscan.io/token/{mint}")
+        print("DexScreener:", market_data["pair_url"])
 
     print("Transactions checked:", checked)
     print("Unique qualifying candidates:", len(unique_mints))
