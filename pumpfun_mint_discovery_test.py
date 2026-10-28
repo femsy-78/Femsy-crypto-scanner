@@ -388,11 +388,19 @@ def main():
         checked += 1
         candidates = find_created_mints(transaction)
 
-        for candidate in candidates:
+                for candidate in candidates:
             mint = candidate["mint"]
 
             if mint in unique_mints:
                 continue
+
+            print("Checking bonding curve for:", mint)
+            curve_account = get_bonding_curve_account(mint)
+
+            if curve_account:
+                print("Bonding-curve account fetched successfully:", mint)
+            else:
+                print("Bonding-curve account not verified:", mint)
 
             market_data = get_dexscreener_data(mint)
 
