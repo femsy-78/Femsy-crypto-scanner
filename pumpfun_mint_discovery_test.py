@@ -436,10 +436,10 @@ def main():
             continue
 
         checked += 1
-        candidates = find_created_mints(transaction)
+candidates = find_created_mints(transaction)
 
-        for candidate in candidates:
-            mint = candidate["mint"]
+    for candidate in candidates:
+        mint = candidate["mint"]
 
         if mint in unique_mints:
             continue
