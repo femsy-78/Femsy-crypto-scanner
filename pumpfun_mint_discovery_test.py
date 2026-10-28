@@ -1,5 +1,6 @@
 import os
 import json
+import base64
 import hashlib
 import urllib.request
 import urllib.error
@@ -16,6 +17,56 @@ RPC_URL = f"https://mainnet.helius-rpc.com/?api-key={API_KEY}"
 
 PUMP_FUN_PROGRAM = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"
 
+def get_bonding_curve_address(mint):
+    """Derive the Pump.fun bonding-curve account address."""
+    try:
+        mint_pubkey = Pubkey.from_string(mint)
+        program_pubkey = Pubkey.from_string(PUMP_FUN_PROGRAM)
+
+        bonding_curve, bump = Pubkey.find_program_address(
+            [b"bonding-curve", bytes(mint_pubkey)],
+            program_pubkey,
+        )
+
+        return str(bonding_curve)
+
+    except ValueError as error:
+        print(f"Invalid mint address {mint}: {error}")
+        return None
+
+def get_bonding_curve_account(mint):
+    """Fetch the derived bonding-curve account from Helius."""
+    address = get_bonding_curve_address(mint)
+
+    if not address:
+        return None
+
+    account = rpc_call(
+        "getAccountInfo",
+        [
+            address,
+            {
+                "encoding": "base64",
+                "commitment": "confirmed",
+            },
+        ],
+    )
+
+    if not account or not account.get("value"):
+        print("Bonding-curve account unavailable:", mint)
+        return None
+
+    value = account["value"]
+
+    print("Bonding-curve address:", address)
+    print("Bonding-curve owner:", value.get("owner"))
+    data = value.get("data") or ["", "base64"]
+    encoded_data = data[0] if data else ""
+    decoded_data = base64.b64decode(encoded_data) if encoded_data else b""
+
+    print("Bonding-curve data length (bytes):", len(decoded_data))
+
+    return value
 
 def rpc_call(method, params):
     payload = {
