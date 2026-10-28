@@ -388,7 +388,7 @@ def main():
         checked += 1
         candidates = find_created_mints(transaction)
 
-                for candidate in candidates:
+           for candidate in candidates:
             mint = candidate["mint"]
 
             if mint in unique_mints:
