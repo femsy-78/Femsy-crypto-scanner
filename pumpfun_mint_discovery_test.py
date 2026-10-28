@@ -67,6 +67,56 @@ def get_bonding_curve_account(mint):
     print("Bonding-curve data length (bytes):", len(decoded_data))
 
     return value
+    
+def decode_bonding_curve_account(account):
+    """Decode documented Pump.fun bonding-curve fields."""
+    if not account:
+        return None
+
+    data = account.get("data") or ["", "base64"]
+
+    if not data or not data[0]:
+        print("Bonding-curve account has no data.")
+        return None
+
+    try:
+        raw = base64.b64decode(data[0], validate=True)
+
+        # Eight-byte Anchor discriminator + five u64 fields + bool.
+        if len(raw) < 49:
+            print("Bonding-curve account data is too short:", len(raw))
+            return None
+
+        discriminator = raw[:8].hex()
+
+        virtual_token_reserves = int.from_bytes(raw[8:16], "little")
+        virtual_sol_reserves = int.from_bytes(raw[16:24], "little")
+        real_token_reserves = int.from_bytes(raw[24:32], "little")
+        real_sol_reserves = int.from_bytes(raw[32:40], "little")
+        token_total_supply = int.from_bytes(raw[40:48], "little")
+        complete_byte = raw[48]
+
+        if complete_byte not in (0, 1):
+            print("Invalid bonding-curve complete flag:", complete_byte)
+            return None
+
+        result = {
+            "discriminator": discriminator,
+            "virtual_token_reserves": virtual_token_reserves,
+            "virtual_sol_reserves": virtual_sol_reserves,
+            "real_token_reserves": real_token_reserves,
+            "real_sol_reserves": real_sol_reserves,
+            "token_total_supply": token_total_supply,
+            "complete": bool(complete_byte),
+        }
+
+        print("Bonding-curve decoded fields:", result)
+        return result
+
+    except (ValueError, TypeError) as error:
+        print("Could not decode bonding-curve account:", error)
+        return None
+    
 
 def rpc_call(method, params):
     payload = {
@@ -398,16 +448,19 @@ def main():
 
             curve_account = get_bonding_curve_account(mint)
 
+                        curve_account = get_bonding_curve_account(mint)
+
             if curve_account:
-                print(
-                    "Bonding-curve account fetched successfully:",
-                    mint,
+                decoded_curve = decode_bonding_curve_account(
+                    curve_account
                 )
+
+                if decoded_curve:
+                    print("Bond complete:", decoded_curve["complete"])
+                else:
+                    print("Bonding-curve decoding failed:", mint)
             else:
-                print(
-                    "Bonding-curve account not verified:",
-                    mint,
-                )
+                print("Bonding-curve account not verified:", mint)
 
             market_data = get_dexscreener_data(mint)
 
