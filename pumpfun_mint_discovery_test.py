@@ -5,6 +5,8 @@ import urllib.request
 import urllib.error
 import time
 
+from solders.pubkey import Pubkey
+
 API_KEY = os.environ.get("HELIUS_API_KEY")
 
 if not API_KEY:
